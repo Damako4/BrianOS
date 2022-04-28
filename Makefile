@@ -16,3 +16,10 @@ kernel.bin: boot/boot.o ${OBJ}
 
 %.o: %.s
 	${ASSEMBLER} $< -o $@
+
+run: kernel.bin
+	qemu-system-i386 -kernel kernel.bin
+
+clean:
+	rm -rf *.bin *.dis *.o kernel.bin *.elf
+	rm -rf kernel/*.o boot/*.bin drivers/*.o boot/*.o
