@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include "../drivers/ports.h"
 
 enum vga_color {
   VGA_COLOR_BLACK = 0,
@@ -95,6 +96,14 @@ void terminal_writestring(const char* data)
 
 void kernel_main(void)
 {
-  terminal_initialize();
-  terminal_writestring("Hello World");
+  outb(0x3d4, 14);
+  int position = inb(0x3d5);
+  position = position << 8;
+  outb(0x3d4, 15);
+  position += inb(0x3d5);
+
+  int offset_vga = position * 2;
+  char *vga = (char *) 0xB8000;
+  vga[offset_vga] = 'X';
+  vga[offset_vga+1] = 0x0f;
 }

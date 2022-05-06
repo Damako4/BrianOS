@@ -1,13 +1,18 @@
-# Makefiles
+C_SOURCES = $(wildcard kernel/*.c drivers/*.c)
+HEADERS = $(wildcard kernel/*.h drivers/*.h)
 
-CC := i686-elf-gcc
-CFLAGS := -ffreestanding -O2 -nostdlib -lgcc
-NAME = brianos
+OBJ = ${C_SOURCES:.c=.o}
 
-compile: src/linker.ld
-	+$(MAKE) -C src
-	$(CC) $(CFLAGS) -T src/linker.ld -o bin/$(NAME).bin build/boot.o build/kernel.o
+CC = i686-elf-gcc
+ASSEMBLER = i686-elf-as
 
-run: bin/brianos.bin
-	echo "Booting kernel, have fun :)"
-	qemu-system-i386 -kernel bin/brianos.bin
+CFLAGS = -ffreestanding -O2 -Wall -Wextra
+
+kernel.bin: boot/boot.o ${OBJ}
+	${CC} -T linker.ld -o $@ ${CFLAGS} -nostdlib $^ -lgcc
+
+%.o: %.c ${HEADERS}
+	${CC} ${CFLAGS} -c $< -o $@
+
+%.o: %.s
+	${ASSEMBLER} $< -o $@
